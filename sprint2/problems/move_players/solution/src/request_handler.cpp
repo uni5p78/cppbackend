@@ -180,15 +180,16 @@ TypeApiRequest ApiHandler::GetTypeApiRequest(const std::vector<std::string>& que
                 return TypeApiRequest::ListMaps;
             };
         } else if (query_words[2] == "game"sv) { // если запросы по игре
-            // if (query_words[3] == "join"sv) {
             if (CheckEndWord(query_words, 3, "join"sv)) {
                 return TypeApiRequest::AddPlayer;
             } else if (CheckEndWord(query_words, 3, "players"sv)) { 
                 return TypeApiRequest::GetListOfPlayersForUser;
             } else if (CheckEndWord(query_words, 3, "state"sv)) { 
                 return TypeApiRequest::GameState;
-            } else if (CheckWord(query_words, 3, "player"sv) && CheckEndWord(query_words, 3, "action"sv) ) {
-                return TypeApiRequest::GameState;
+            } else if (CheckWord(query_words, 3, "player"sv) && CheckEndWord(query_words, 4, "action"sv) ) {
+                return TypeApiRequest::MovePlayers;
+            } else if (CheckEndWord(query_words, 3, "tick"sv)) {
+                return TypeApiRequest::GameTick;
             };
         }
     }
@@ -304,17 +305,36 @@ StringResponse ApiHandler::GetGameStateForUser(const StringRequest& req){
 }
 
 StringResponse ApiHandler::RequestMovePlayers(const StringRequest& req){
-    std::string direct;
+    char dir_symbol;
     try{
         auto json_obj = boost_json::ParseStr(req.body());
-        direct = json_obj.GetParamAsString("move"s);
-        app_.CheckDogDirect(direct);
+        std::string direct = json_obj.GetParamAsString("move"s);
+        dir_symbol = app_.ConvertDogDirect(direct);
     } catch (...) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
         return ErrorResponseJson(http::status::bad_request, "invalidArgument","Failed to parse action", req);
     }
     std::string token = std::string(req.at(http::field::authorization).substr(7));
     try{
-        app_.SetDogDirect(token, direct);
+        app_.SetDogDirect(token, dir_symbol);
+    } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
+        return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
+    }
+    return MakeStringResponse(http::status::ok, ""s
+        , req.version(), req.keep_alive(), req.method(), ContentType::APP_JSON);
+}
+
+StringResponse ApiHandler::RequestGameTick(const StringRequest& req){
+    int time_delta;
+    try{
+        auto json_obj = boost_json::ParseStr(req.body());
+        time_delta = json_obj.GetParamAsInt("timeDelta"s);
+        // ch_dir = app_.ConvertDogDirect(direct);
+    } catch (...) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+        return ErrorResponseJson(http::status::bad_request, "invalidArgument","Failed to parse tick request JSON", req);
+    }
+    // std::string token = std::string(req.at(http::field::authorization).substr(7));
+    try{
+        app_.ChangeGameSate(time_delta);
     } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
         return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
     }
@@ -346,6 +366,8 @@ StringResponse ApiHandler::HandleApiRequest(const StringRequest& req) {
         return GetGameStateForUser(req);
     case TypeApiRequest::MovePlayers:
         return RequestMovePlayers(req);
+    case TypeApiRequest::GameTick:
+        return RequestGameTick(req);
     };
     return ErrorResponseJson(http::status::bad_request, req);
 }  

@@ -337,7 +337,7 @@ void Dog::CalcNewPosOnRoad(const Map& map, const int time_delta){
     const Dog::Coord HalfWideRoad = 0.4;
     auto pos_1 = GetPos();
     auto speed = speed_dir.dir_x;
-    bool IsHorizontal = speed != 0.0;
+    bool IsHorizontal = speed != 0.e0;
     Dog::Coord level, point1, point2;
     if (IsHorizontal) { // собака движется горизонтально
         level = pos_1.y;

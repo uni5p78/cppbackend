@@ -76,6 +76,8 @@ private:
     Offset offset_;
 };
 
+class Map;
+
 class Dog {
     public:
         using Id = util::Tagged<int, Dog>;
@@ -92,16 +94,19 @@ class Dog {
             // Dimension dir_x, dir_y;
             Dimension dir_x{}, dir_y{};
         };    
-        enum class Dir {Left = 'L', Right = 'R', Up = 'U', Down = 'D', None = 0}; 
+        enum class Dir: char {Left = 'L', Right = 'R', Up = 'U', Down = 'D', None = 0}; 
     
         void SetPos(Pos pos);
+        void SetPos(bool IsHorizontal, Pos pos);
         Pos GetPos() const;
         Speed GetSpeed() const;
         void SetSpeed(Speed speed);
+        void Stop();
         void SetSpeed(Dir dir, Dimension dog_speed);
         char GetDirSymbol() const;
         void SetDir(Dir dir, Dimension dog_speed);
-        
+        static char CheckDirSymbol(char dir);
+        void CalcNewPosOnRoad(const Map& map, const int time_delta);      
     private:
         Id id_;
         std::string name_;
@@ -123,16 +128,30 @@ public:
     const Buildings& GetBuildings() const noexcept ;
     const Roads& GetRoads() const noexcept ;
     const Offices& GetOffices() const noexcept ;
-    void AddRoad(const Road& road);
+    void AddRoad(const Road&& road);
     void AddBuilding(const Building& building);
     void AddOffice(Office office);
     Dog::Pos GetRandomPos() const;
+    Dog::Pos GetStartPos() const;
     void SetDogSpeed(Dog::Dimension dog_speed);
     Dog::Dimension GetDogSpeed() const;
-
+    void BildListOderedPath();
+    Dimension GetEndOfPath(bool IsHorizontal, bool to_right, Dimension level_dog, Dimension point_dog) const ;
+    Dimension GetEndOfPathV(Dimension level_dog, Dimension point_dog, bool to_right) const ;
 private:
     using OfficeIdToIndex = std::unordered_map<Office::Id, size_t, util::TaggedHasher<Office::Id>>;
-
+    struct Path {Coord level, point1, point2;};
+    // Coord level - это координа общая для обеих точек отрезка дороги 
+    // для горизонтальных дорог это "y", для вертикальных - "x"
+    // point1, point2 - это координаты точек на оставшейся оси, отличной от level
+    class OrderedListPaths {
+    public:
+        void BildListOderedPath();
+        Dimension GetEndOfPath(Dimension level_dog, Dimension point_dog, bool to_right) const ;
+        void AddPath(Coord base, Coord point1, Coord point2);
+    private:
+        std::vector<Path> paths_;
+    };
     Id id_;
     std::string name_;
     Roads roads_;
@@ -141,11 +160,14 @@ private:
     OfficeIdToIndex warehouse_id_to_index_;
     Offices offices_;
     Dog::Dimension dog_speed_;
+    OrderedListPaths h_paths_;
+    OrderedListPaths v_paths_;
+    // void BildListOderedPath(OrderedListPaths paths);
 };
 
 class GameSession {
 public:
-    using Dogs = std::vector<const Dog*>;
+    using Dogs = std::vector<Dog*>;
     GameSession(const Map* map) noexcept;
     void AddDog(Dog* dog);
     const Dogs& GetDogs() const;
@@ -170,6 +192,7 @@ public:
     GameSession* GetSession(const Map* map);
     void SetDefaultDogSpeed(Dog::Dimension dog_speed);
     Dog::Dimension GetDefaultDogSpeed() const;
+    void ChangeGameSate(int time_delta);
 
 private:
     using MapIdHasher = util::TaggedHasher<Map::Id>;
@@ -180,6 +203,8 @@ private:
     std::vector<std::unique_ptr<Dog>> dogs_;
     MapToSessions sessions_;
     Dog::Dimension default_dog_speed_ = 1.0;
+
+    MapToSessions& GetSessions();
 };
 
 }  // namespace model

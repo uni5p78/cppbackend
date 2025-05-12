@@ -180,15 +180,16 @@ TypeApiRequest ApiHandler::GetTypeApiRequest(const std::vector<std::string>& que
                 return TypeApiRequest::ListMaps;
             };
         } else if (query_words[2] == "game"sv) { // если запросы по игре
-            // if (query_words[3] == "join"sv) {
             if (CheckEndWord(query_words, 3, "join"sv)) {
                 return TypeApiRequest::AddPlayer;
             } else if (CheckEndWord(query_words, 3, "players"sv)) { 
                 return TypeApiRequest::GetListOfPlayersForUser;
             } else if (CheckEndWord(query_words, 3, "state"sv)) { 
                 return TypeApiRequest::GameState;
-            } else if (CheckWord(query_words, 3, "player"sv) && CheckEndWord(query_words, 3, "action"sv) ) {
-                return TypeApiRequest::GameState;
+            } else if (CheckWord(query_words, 3, "player"sv) && CheckEndWord(query_words, 4, "action"sv) ) {
+                return TypeApiRequest::MovePlayers;
+            } else if (CheckEndWord(query_words, 3, "tick"sv)) {
+                return TypeApiRequest::GameTick;
             };
         }
     }

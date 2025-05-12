@@ -26,6 +26,7 @@ void AddRoads(model::Map& map, const boost_json::ArrayJsonValue& roads){
             map.AddRoad(move(road_model));
         }
     }
+    map.BildListOderedPath();
 }
 
 void AddBuildings(model::Map& map, const boost_json::ArrayJsonValue& buildings){

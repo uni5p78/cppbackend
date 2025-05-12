@@ -196,25 +196,46 @@ namespace app {
         return players_list_.GetPlayersListForUser(GetDogsGameSessionForToken(token));
     }
 
-    void Application::SetDogDirect(const std::string_view& token, const std::string direct){
+    void Application::SetDogDirect(const std::string_view& token, const char direct){
         const auto player = FindPlayer(token);
         const auto dog_speed = player->GetGameSession().GetMap().GetDogSpeed();
-        model::Dog::Dir dir = direct[0]==0 ? model::Dog::Dir::None : static_cast<model::Dog::Dir>(direct[0]);
+        auto dir = static_cast<model::Dog::Dir>(direct);
         auto& dog = player->GetDog();
         dog.SetDir(dir, dog_speed);
     }
 
-    void Application::CheckDogDirect(const std::string direct){
-        if(direct.size()>1) {
-            throw std::invalid_argument("Invalid syntax dog direct.");
+    void Application::ChangeGameSate(int time_delta){
+        game_.ChangeGameSate(time_delta);
+    }
+
+    char Application::ConvertDogDirect(const std::string direct){
+        size_t ch_count = direct.size();
+        switch (ch_count){
+        case 0:
+            return 0;
+        case 1:
+            return model::Dog::CheckDirSymbol(direct[0]);
         }
-        if(direct.size()==1) {
-            char dir = direct[0];
-            if(dir!='U' && dir!='D' && dir!='R' && dir!='R'){
-                throw std::invalid_argument("Invalid syntax dog direct.");
-            }
-            // return static_cast<model::Dog::Dir>(direct[0]);
-        }
+        throw std::invalid_argument("Invalid syntax dog direct.");
+
+
+
+        // if(direct.size()==1) {
+        //     // if(dir!='U' && dir!='D' && dir!='R' && dir!='R'){
+        //     //     throw std::invalid_argument("Invalid syntax dog direct.");
+        //     // }
+        //     dir = static_cast<model::Dog::Dir>(direct[0]);
+        //     return static_cast<model::Dog::Dir>(direct[0]);
+        // }
+        // throw std::invalid_argument("Invalid syntax dog direct.");
+        
+        // if(direct.size()=0) {
+        //     dir = 0;
+        // }
+
+        // if(direct.size()>1) {
+        //     throw std::invalid_argument("Invalid syntax dog direct.");
+        // }
         // std::string all_direct = "LRUD"s;
         // if(direct.size()>1 ||(direct.size()==1 && all_direct.find(direct) == std::string::npos)){
         //     throw std::invalid_argument("Invalid syntax dog direct.");

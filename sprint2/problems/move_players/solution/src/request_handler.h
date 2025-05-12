@@ -48,6 +48,7 @@ enum class TypeApiRequest {
     , GetListOfPlayersForUser
     , GameState
     , MovePlayers
+    , GameTick
 };
 
 const std::unordered_map<TypeApiRequest, ChekParam> CHECK_LIST_REQUEST{
@@ -57,6 +58,7 @@ const std::unordered_map<TypeApiRequest, ChekParam> CHECK_LIST_REQUEST{
     , {TypeApiRequest::GetListOfPlayersForUser, {WaitingMethod::GET_HEAD, CheckToken::Yes}}
     , {TypeApiRequest::GameState, {WaitingMethod::GET_HEAD, CheckToken::Yes}}
     , {TypeApiRequest::MovePlayers, {WaitingMethod::POST, CheckToken::Yes}}
+    , {TypeApiRequest::GameTick, {WaitingMethod::POST, CheckToken::No}}
 };
 
 struct ResponseParam {
@@ -80,6 +82,7 @@ public:
     StringResponse RequestPlayersListForUser(const StringRequest& req);
     StringResponse GetGameStateForUser(const StringRequest& req);
     StringResponse RequestMovePlayers(const StringRequest& req);
+    StringResponse RequestGameTick(const StringRequest& req);
 private:
     app::Application& app_;
     TypeApiRequest GetTypeApiRequest(const std::vector<std::string>& query_words);

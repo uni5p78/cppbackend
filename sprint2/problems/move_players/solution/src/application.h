@@ -214,8 +214,9 @@ namespace app {
         const map_info::Result GetMapInfo(const std::string_view map_name);
         const game_state::Result GetGameSate(const std::string_view map_name);
         players_list::Result GetPlayersListForUser(const std::string_view& token);
-        void SetDogDirect(const std::string_view& token, const std::string direct);
-        void CheckDogDirect(const std::string direct);
+        void SetDogDirect(const std::string_view& token, const char direct);
+        void ChangeGameSate(int time_delta);
+        char ConvertDogDirect(const std::string direct);
 
     private:
         Players players_;
