@@ -201,7 +201,7 @@ Dimension Map::GetEndOfPathV(Dimension level_dog, Dimension point_dog, bool to_u
 
 
 Dimension Map::OrderedListPaths::GetEndOfPath(Dimension level_dog, Dimension point_dog, bool to_upward_direct) const{
-    auto compare_coord = [](Path road, Dimension coord_find){ return coord_find < road.level; };
+    auto compare_coord = [](Path road, Dimension coord_find){ return road.level < coord_find; };
     auto it = std::lower_bound(paths_.begin(), paths_.end(), level_dog, compare_coord);
     Dimension res = point_dog; // если не найдем дорогу в нужном направлении, то передадим точку собаки
 
@@ -353,7 +353,7 @@ void Dog::CalcNewPosOnRoad(const Map& map, const int time_delta){
     int point1_int = round(point1);               
     int point2_int = round(point2); 
     bool to_right = speed>0;
-    // Проверка отсутствия перпятствий на пути собаки
+    // Проверка наличия препятствий на пути собаки
     if ((point1_int != point2_int) || (abs(point2-point2_int)>=HalfWideRoad)){
         // Если собака вышла из начаьного кадрата дороги
         // Проверим - есть дальше дорога?)
