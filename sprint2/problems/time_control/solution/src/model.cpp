@@ -306,17 +306,20 @@ char Dog::GetDirSymbol() const {
     } 
 }  
 
-void Dog::SetDir(Dir dir, Dimension dog_speed){
-    if(dir == dir_){
-        return;
-    }
+void Dog::SetDirSpeed(Dir dir, Dimension dog_speed){
+    dir_ = dir;
+    dog_speed *= dir==Dir::Left || dir==Dir::Up ? -1.0 : 1.0;
+    speed_ = dir==Dir::Left || dir==Dir::Right ? Speed{dog_speed, 0.0} : Speed{0.0, dog_speed};
+    // if(dir == dir_){
+    //     return;
+    // }
 
-    if(dir==Dir::None){
-        SetSpeed(Speed{0.0f, 0.0f});
-    } else {
-        dir_ = dir;
-        SetSpeed(dir, dog_speed);
-    }
+    // if(dir==Dir::None){
+    //     SetSpeed(Speed{0.0f, 0.0f});
+    // } else {
+    //     dir_ = dir;
+    //     SetSpeed(dir, dog_speed);
+    // }
 }
 
 char Dog::CheckDirSymbol(char dir){
@@ -471,8 +474,8 @@ void GameSession::AddDog(Dog* dog){
     dogs_.push_back(dog);
     // dog->SetPos(map_->GetRandomPos());
     dog->SetPos(map_->GetStartPos());
-    dog->SetSpeed({0.0, 0.0});
-    dog->SetDir(Dog::Dir::Up, 0.0);
+    // dog->SetSpeed({0.0, 0.0});
+    dog->SetDirSpeed(Dog::Dir::Up, 0.0);
 
 }
 

@@ -104,7 +104,7 @@ class Dog {
         void Stop();
         void SetSpeed(Dir dir, Dimension dog_speed);
         char GetDirSymbol() const;
-        void SetDir(Dir dir, Dimension dog_speed);
+        void SetDirSpeed(Dir dir, Dimension dog_speed);
         static char CheckDirSymbol(char dir);
         void CalcNewPosOnRoad(const Map& map, const int time_delta);      
     private:

@@ -201,7 +201,7 @@ namespace app {
         const auto dog_speed = player->GetGameSession().GetMap().GetDogSpeed();
         auto dir = static_cast<model::Dog::Dir>(direct);
         auto& dog = player->GetDog();
-        dog.SetDir(dir, dog_speed);
+        dog.SetDirSpeed(dir, dog_speed);
     }
 
     void Application::ChangeGameSate(int time_delta){
