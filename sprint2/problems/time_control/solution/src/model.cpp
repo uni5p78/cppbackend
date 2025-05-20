@@ -602,7 +602,7 @@ const Map* Game::FindMap(const Map::Id& id) const noexcept {
 }
 
 Dog* Game::AddDog(std::string name){
-    Dog::Id id(dogs_.size());
+    Dog::Id id(dogs_.size()+1);
     dogs_.push_back(std::make_unique<Dog>(name, id));
     return dogs_.back().get();
 }
