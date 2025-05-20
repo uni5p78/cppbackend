@@ -133,7 +133,10 @@ std::string GetPlayersJsonBody(const app::players_list::Result& dogs){
     return serialize(obj);
 }
 
-
+std::string SerializeEmptyJsonObject(){
+    boost::json::object obj;
+    return serialize(obj);
+}
 
 JsonValue::JsonValue(const boost::json::value& value)
 : value_(value){

@@ -319,7 +319,7 @@ StringResponse ApiHandler::RequestMovePlayers(const StringRequest& req){
     } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
         return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
     }
-    return MakeStringResponse(http::status::ok, ""s
+    return MakeStringResponse(http::status::ok, boost_json::SerializeEmptyJsonObject()
         , req.version(), req.keep_alive(), req.method(), ContentType::APP_JSON);
 }
 
@@ -338,7 +338,7 @@ StringResponse ApiHandler::RequestGameTick(const StringRequest& req){
     } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
         return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
     }
-    return MakeStringResponse(http::status::ok, "{}"s
+    return MakeStringResponse(http::status::ok, boost_json::SerializeEmptyJsonObject()
         , req.version(), req.keep_alive(), req.method(), ContentType::APP_JSON);
 }
 

@@ -21,6 +21,8 @@ std::string GetMapJson(const app::map_info::Result& map);
 std::string GetGameSateJsonBody(const app::game_state::Result& dogs);
 std::string GetPlayerJsonBody(const app::join_game::Result& player_data);
 std::string GetPlayersJsonBody(const app::players_list::Result& dogs);
+std::string SerializeEmptyJsonObject();
+
 
 class JsonValue;
 using ArrayJsonValue = std::vector<JsonValue>;
