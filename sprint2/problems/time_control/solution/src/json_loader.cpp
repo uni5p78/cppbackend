@@ -58,14 +58,14 @@ void LoadGame(model::Game& game,const std::filesystem::path& json_path) {
     using IdMap = util::Tagged<std::string, model::Map>;
 
     const auto json_obj = boost_json::ParseFile(json_path);
-    const auto jmaps = json_obj.GetParamAsArray("maps"s);
     // Устанавливаем скорость собак по умолчаниюю для всех карт
-    if(json_obj.ContainsParam("dogSpeed"s)){ //если есть
+    if(json_obj.ContainsParam("defaultDogSpeed"s)){ //если есть
         game.SetDefaultDogSpeed(json_obj.GetParamAsDouble("defaultDogSpeed"s));
     } else { // если нет - записываем скорость по умолчанию 1.0
         game.SetDefaultDogSpeed(1.0);
     };
     
+    const auto jmaps = json_obj.GetParamAsArray("maps"s);
     for(const auto& jmap : jmaps){
         std::string id =  jmap.GetParamAsString("id"s);
         std::string name =  jmap.GetParamAsString("name"s);
