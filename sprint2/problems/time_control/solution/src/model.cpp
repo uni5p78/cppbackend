@@ -2,6 +2,7 @@
 
 #include <stdexcept>
 #include <algorithm>
+#include <cmath>
 
 
 namespace model {
@@ -357,7 +358,7 @@ void Dog::CalcNewPosOnRoad(const Map& map, const int time_delta){
     int point2_int = round(point2); 
     bool to_right = speed>0;
     // Проверка наличия препятствий на пути собаки
-    if ((point1_int != point2_int) || (abs(point2-point2_int)>=HalfWideRoad)){
+    if ((point1_int != point2_int) || (std::abs(point2-point2_int)>=HalfWideRoad)){
         // Если собака вышла из начаьного кадрата дороги
         // Проверим - есть дальше дорога?)
         auto point_end = map.GetEndOfPath(IsHorizontal, to_right, level_int, point1_int);
