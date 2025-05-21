@@ -365,7 +365,7 @@ void Dog::CalcNewPosOnRoad(const Map& map, const int time_delta){
 
         if ((to_right && point2 >= HalfWideRoad + point_end) //если прошли край дороги
         ||   (!to_right && point2 <= -HalfWideRoad + point_end)) {
-            bool minus = to_right ? 1.0 : -1.0;
+            Dog::Coord minus = to_right ? 1.0 : -1.0;
             point2 = HalfWideRoad*minus+point_end; 
             Stop();  // Останавливаем собаку на краю дороги
         }
