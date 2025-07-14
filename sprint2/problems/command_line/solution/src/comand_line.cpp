@@ -16,7 +16,7 @@ using namespace std::literals;
         ("config-file,c", po::value(&args.config_file)->value_name("file"s), "set config file path")
         ("www-root,w", po::value(&args.www_root)->value_name("path"s), "set static files root")
         ("tick-period,t", po::value(&args.tick_period)->value_name("ms"s), "set tick period")
-        ("randomize-spawn-points", po::value(&args.randomize_spawn_points), "spawn dogs at random positions")
+        ("randomize-spawn-points", "spawn dogs at random positions")
         ;
     po::variables_map vm;
     po::store(po::parse_command_line(argc, argv, desc), vm);
@@ -26,6 +26,8 @@ using namespace std::literals;
         std::cout << desc;
         return std::nullopt;
     }
+
+    args.randomize_spawn_points = vm.contains("randomize-spawn-points"s);
 
     if (!vm.contains("config-file"s)) {
         throw std::runtime_error("Config file have not been specified!"s);

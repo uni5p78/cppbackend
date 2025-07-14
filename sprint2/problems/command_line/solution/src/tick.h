@@ -1,35 +1,14 @@
 #pragma once
-#include "tick.h"
 #include <boost/asio/strand.hpp>
 #include <boost/asio/ip/tcp.hpp>
 
 #include <chrono>
-// #include <boost/program_options.hpp>
-// #include <boost/asio/strand.hpp>
 
-// #include <fstream>
-// #include <iostream>
-// #include <optional>
-// #include <vector>
-// #include <memory>
+namespace tick 
+{
+    namespace net = boost::asio;
+    namespace sys = boost::system;
 
-// #include <boost/asio/strand.hpp>
-// #include <boost/asio/ip/tcp.hpp>
-
-// #include <memory>
-
-// #include <boost/beast/core.hpp>
-// #include <boost/beast/http.hpp>
-
-namespace tick {
-
-    
-namespace net = boost::asio;
-namespace sys = boost::system;
-// namespace beast = boost::beast;
-   
-    
-    
     class Ticker : public std::enable_shared_from_this<Ticker> {
     public:
         using Strand = net::strand<net::io_context::executor_type>;
@@ -47,6 +26,5 @@ namespace sys = boost::system;
         Handler handler_;
         std::chrono::steady_clock::time_point last_tick_;
     };
-
-
+    
 } // namespace tick

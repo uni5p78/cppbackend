@@ -5,17 +5,15 @@
 #include <chrono>
 
 
-namespace comand_line {
+namespace comand_line 
+{
+    struct Args {
+        int tick_period{};
+        std::string config_file{};
+        std::string www_root{};
+        bool randomize_spawn_points{};
+    }; 
 
-struct Args {
-    int tick_period{};
-    std::string config_file{};
-    std::string www_root{};
-    bool randomize_spawn_points{};
-}; 
-
-
-[[nodiscard]] std::optional<Args> ParseCommandLine(int argc, const char* const argv[]) ;
-
-} // namespace comand_line 
+    [[nodiscard]] std::optional<Args> ParseCommandLine(int argc, const char* const argv[]) ;
+} 
 

@@ -1,11 +1,8 @@
 #pragma once
 #include "model.h"
 
-
-
 namespace app {
     
-
     class Player {
     public:
         using Token = util::Tagged<std::string, Player>;
@@ -44,7 +41,6 @@ namespace app {
     
     
         std::random_device random_device_;
-        // std::random_device random_device2_;
         std::mt19937_64 generator1_{[this] {
             std::uniform_int_distribution<std::mt19937_64::result_type> dist;
             return dist(random_device_);
@@ -72,17 +68,7 @@ namespace app {
             : game_(game){
             }
             
-            const list_maps::Result ListMaps() {
-                auto maps = game_.GetMaps();
-                list_maps::Result res(maps.size());
-                size_t i = 0;
-                for(const auto& map : maps){
-                    res[i].id = *map.GetId();
-                    res[i].name = map.GetName();
-                    ++i;
-                };
-                return res;           
-            }
+            const list_maps::Result ListMaps();
         private:
             model::Game& game_;
         };

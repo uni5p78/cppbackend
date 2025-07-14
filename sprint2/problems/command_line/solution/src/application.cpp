@@ -50,6 +50,22 @@ namespace app {
         return Player::Token(stream.str());     
     }
 
+    namespace list_maps {
+      
+        const list_maps::Result UseCase::ListMaps() {
+            auto maps = game_.GetMaps();
+            list_maps::Result res(maps.size());
+            size_t i = 0;
+            for(const auto& map : maps){
+                res[i].id = *map.GetId();
+                res[i].name = map.GetName();
+                ++i;
+            };
+            return res;           
+        }
+
+    } // namespace list_maps
+
     namespace map_info {
         Error::Error(ErrorReason reason)
         : reason_(reason){
@@ -217,30 +233,6 @@ namespace app {
             return model::Dog::CheckDirSymbol(direct[0]);
         }
         throw std::invalid_argument("Invalid syntax dog direct.");
-
-
-
-        // if(direct.size()==1) {
-        //     // if(dir!='U' && dir!='D' && dir!='R' && dir!='R'){
-        //     //     throw std::invalid_argument("Invalid syntax dog direct.");
-        //     // }
-        //     dir = static_cast<model::Dog::Dir>(direct[0]);
-        //     return static_cast<model::Dog::Dir>(direct[0]);
-        // }
-        // throw std::invalid_argument("Invalid syntax dog direct.");
-        
-        // if(direct.size()=0) {
-        //     dir = 0;
-        // }
-
-        // if(direct.size()>1) {
-        //     throw std::invalid_argument("Invalid syntax dog direct.");
-        // }
-        // std::string all_direct = "LRUD"s;
-        // if(direct.size()>1 ||(direct.size()==1 && all_direct.find(direct) == std::string::npos)){
-        //     throw std::invalid_argument("Invalid syntax dog direct.");
-        // }
-
     }
         
     const model::GameSession::Dogs& Application::GetDogsGameSessionForToken(const std::string_view& token){

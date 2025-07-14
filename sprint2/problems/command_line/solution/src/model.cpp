@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <cmath>
 
-
 namespace model {
 using namespace std::literals;
 
@@ -218,25 +217,6 @@ Dimension Map::OrderedListPaths::GetEndOfPath(Dimension level_dog, Dimension poi
     return res;
 }
 
-// Dimension Map::OrderedListPaths::GetEndOfPath(Dimension level_dog, Dimension point_dog, bool to_upward_direct) const{
-//     auto compare_coord = [](Dimension coord_find, Path road){ return coord_find < road.level; };
-//     auto it = std::lower_bound(paths_.begin(), paths_.end(), level_dog, compare_coord);
-//     Dimension res = point_dog;
-
-//     while (it!=paths_.end() && (*it).level==level_dog) { //Если нашли дорогу с нужным уровнем
-//         auto path = *it;
-//         if (point_dog<path.point1 && point_dog>path.point2) { // если собака не на этой дороге
-//             it+=1;  // переходим на следующую
-//             continue; 
-//         }
-//         // return to_upward_direct ? path.point2 : path.point1;
-//         // res = to_right ? std::max(res, road.x2) : std::min(res, road.x1);
-//         res =  to_upward_direct ? path.point2 : path.point1;
-//         break;
-//     }
-//     return res;
-// }
-
 void Map::OrderedListPaths::AddPath(Coord coord, Coord mark1, Coord mark2){
     paths_.emplace_back(coord, mark1, mark2);
 }
@@ -288,9 +268,6 @@ void Dog::SetSpeed(Dir dir, Dimension dog_speed){
     speed_ = dir==Dir::Left || dir==Dir::Right ? Speed{dog_speed, 0.0} : Speed{0.0, dog_speed};
 }
 
-
-
-
 char Dog::GetDirSymbol() const {
     switch (dir_)
     {
@@ -311,16 +288,6 @@ void Dog::SetDirSpeed(Dir dir, Dimension dog_speed){
     dir_ = dir;
     dog_speed *= dir==Dir::Left || dir==Dir::Up ? -1.0 : 1.0;
     speed_ = dir==Dir::Left || dir==Dir::Right ? Speed{dog_speed, 0.0} : Speed{0.0, dog_speed};
-    // if(dir == dir_){
-    //     return;
-    // }
-
-    // if(dir==Dir::None){
-    //     SetSpeed(Speed{0.0f, 0.0f});
-    // } else {
-    //     dir_ = dir;
-    //     SetSpeed(dir, dog_speed);
-    // }
 }
 
 char Dog::CheckDirSymbol(char dir){
@@ -374,99 +341,6 @@ void Dog::CalcNewPosOnRoad(const Map& map, const std::chrono::milliseconds time_
     SetPos(IsHorizontal, {point2, level});
 }
 
-// if (!((point1_int == point2_int) && (abs(point2-point2_int)<HalfWideRoad))){
-//     // Проверим - есть дальше дорога?)
-//     auto point_end = map.GetEndOfPath(IsHorizontal, to_right, level_int, point1_int);
-
-//     if (!((to_right && point2 < HalfWideRoad + point_end) //если прошли край дороги
-//     ||   (!to_right && point2 > -HalfWideRoad + point_end))) {
-//         point2 = HalfWideRoad*znak()+point_end; 
-//         Stop();  // Останавливаем собаку на краю дороги
-//     }
-//     bool d = (point1_int != point2_int) || (abs(point2-point2_int)>=HalfWideRoad);
-//     bool f = (!to_right || point2 >= HalfWideRoad + point_end) //если прошли край дороги
-//     &&   (to_right || point2 <= -HalfWideRoad + point_end);
-
-//     bool f = (to_right && point2 >= HalfWideRoad + point_end) //если прошли край дороги
-//     ||   (!to_right && point2 <= -HalfWideRoad + point_end);
-
-// }    
-
-
-// if ((to_right && point2_int>point_end) //если прошли последнюю точку дороги
-// || (!to_right && point2_int<point_end)) {  
-//     point2 = HalfWideRoad*znak()+point_end; 
-//     Stop();  // Останавливаем собаку на краю в конце дороги
-// } else if (point2_int=point_end) { // если  дошли до последней точки дороги
-//     // нужно проверить вышла собака за границы дороги или нет
-//     if ((to_right && (point2 - point_end > HalfWideRoad))
-//     || (!to_right && (point_end - point2 > HalfWideRoad))) {
-//         point2 = HalfWideRoad*znak()+point_end;
-//         Stop(); // Останавливаем собаку на краю в конце дороги если прошли край
-//     }
-// } 
-
-
-// void Dog::CalcNewPosOnRoad(const Map& map, const int time_delta){
-//     const Dog::Coord HalfWideRoad = 0.4;
-//     auto speed = GetSpeed();
-//     auto pos_1 = GetPos();
-//     if (speed.dir_x==0.0 && speed.dir_y==0.0 ) {
-//         return;
-//     };
-//     const auto x1 = pos_1.x;
-//     const auto y1 = pos_1.y;
-//     bool HorizontalDirect = speed.dir_x != 0.0;
-//     if (HorizontalDirect) { // собака движется горизонтально
-//         auto x2 = x1 + speed.dir_x * time_delta / 1000.0;   
-//         int x1_int = round(x1);               
-//         int x2_int = round(x2); 
-//         int y1_int = round(y1); 
-//         if (x1_int == x2_int && abs(x2-x2_int)<HalfWideRoad){
-//             SetPos({x2, y1}); // Если собака не дошла до возможной границы дороги
-//         } else {
-//             // Проверим - есть дальше дорога?)
-//             bool to_right = speed.dir_x>0;
-//             auto x_end = map.GetEndOfHorozontalPath(y1_int, x1_int, to_right);
-//             if (to_right) {
-//                 if ((to_right && x2_int<x_end) 
-//                 || (!to_right && x2_int>x_end)) {  // если не дошли до последней точки дороги
-//                     SetPos({x2, y1}); 
-//                 } else if (x2_int=x_end) { // если  дошли до последней точки дороги
-//                     // нужно проверить вышла собака за границы дороги или нет
-//                     if (to_right && x2-x2_int>HalfWideRoad) {
-//                         SetPos({HalfWideRoad+x2_int, y1});
-//                         Stop();
-//                     } else if (!to_right && x2-x2_int>-HalfWideRoad){
-//                         SetPos({-HalfWideRoad+x2_int, y1});
-//                         Stop();
-//                     } else {
-//                         SetPos({x2, y1}); // Если собака не дошла до возможной границы дороги
-//                     }
-//                 } else if (x2_int>x_end) { //если прошли последнюю точку дороги
-//                     SetPos({HalfWideRoad+x_end, y1});
-//                     Stop();  
-//                 }  
-//             } else {
-//                 if (x2_int<x_end) {  // если не дошли до последней точки дороги
-//                     SetPos({x2, y1}); 
-//                 } else if (x2_int=x_end) { // если  дошли до последней точки дороги
-//                     // нужно проверить вышла собака за границы дороги или нет
-//                     if (abs(x2-x2_int)<HalfWideRoad) {
-//                         SetPos({x2, y1}); // Если собака не дошла до возможной границы дороги
-//                     } else {
-//                         SetPos({HalfWideRoad+x2_int, y1});
-//                         Stop();      
-//                     }
-//                 } else if (x2_int>x_end) { //если прошли последнюю точку дороги
-//                     SetPos({HalfWideRoad+x_end, y1});
-//                     Stop();  
-//                 }  
-//             }
-
-//         }              
-//     }
-// }
 
 GameSession::GameSession(const Map* map, bool randomize_spawn_points) noexcept
 : map_(map) 

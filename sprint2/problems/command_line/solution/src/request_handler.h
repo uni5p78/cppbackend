@@ -1,6 +1,5 @@
 #pragma once
 #include "http_server.h"
-// #include "model.h"
 #include "application.h"
 #include <filesystem>
 #include <variant>

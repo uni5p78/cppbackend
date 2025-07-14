@@ -25,14 +25,6 @@ JoinRequest ParseJoinRequest(const std::string& object){
     return res;
 }    
 
-// JoinRequest ParsePlaerActionRequest(const std::string& object){
-//     boost::json::value j = boost::json::parse(object);
-//     JoinRequest res;
-//     res.user_name = j.as_object().at("userName").get_string().c_str();
-//     res.map_id = j.as_object().at("mapId").get_string().c_str();
-//     return res;
-// }    
-
 std::string GetMapsJson(const app::list_maps::Result& maps){
     boost::json::array arr;
     for(const auto&map : maps){
@@ -192,27 +184,4 @@ JsonValue ParseStr(const std::string& str_json){
 
 
 } // namespace boost_json 
-
-
-/*
-
-    // auto j = std::shared_ptr<boost::json::value>(new boost::json::value(boost::json::parse(sstr.str())));
-
-
-JsonValue::JsonValue(const boost::json::value& value, JsonValue parent)
-: value_(value)
-, parent_ptr_(parent.GetParetnPtr()){
-}
-
-JsonValue::JsonValue(const std::shared_ptr<boost::json::value> parent_ptr)
-: value_(*parent_ptr)
-, parent_ptr_(parent_ptr){
-}
-
-
-std::shared_ptr<boost::json::value> JsonValue::GetParetnPtr() const {
-    return parent_ptr_;
-}
-
-*/
 

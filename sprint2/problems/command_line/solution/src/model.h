@@ -163,7 +163,6 @@ private:
     Dog::Dimension dog_speed_;
     OrderedListPaths h_paths_;
     OrderedListPaths v_paths_;
-    // void BildListOderedPath(OrderedListPaths paths);
 };
 
 class GameSession {

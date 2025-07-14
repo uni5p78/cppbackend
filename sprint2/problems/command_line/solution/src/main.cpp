@@ -1,10 +1,5 @@
 #include "sdk.h"
-//
-// #include <boost/program_options.hpp>
-// #include <boost/asio/io_context.hpp>
 #include <boost/asio/signal_set.hpp>
-// #include <boost/log/trivial.hpp>
-// #include <iostream>
 #include <thread>
 
 #include "json_loader.h"
@@ -12,14 +7,7 @@
 #include "logging_request_handler.h"
 #include "tick.h"
 #include "comand_line.h"  
-
-#include "boost_log.h"   
-#include <boost/log/trivial.hpp>     // для BOOST_LOG_TRIVIAL
-#include <boost/log/utility/setup/console.hpp>
-#include <boost/log/utility/manipulators/add_value.hpp>
-#include <boost/json.hpp>
-namespace json = boost::json;
-namespace logging = boost::log;
+#include "logger.h"   
 
 using namespace std::literals;
 namespace net = boost::asio;
@@ -44,25 +32,23 @@ void RunWorkers(unsigned n, const Fn& fn) {
 }  // namespace
 
 int main(int argc, const char* argv[]) {
-    // if (argc != 3) {
-    //     std::cerr << "Usage: game_server <game-config-json> <path-static-files>"sv << std::endl;
-    //     return EXIT_FAILURE;
-    // }
+    logger::InitLogFilter();
     try {
-        boost_log::InitBoostLogFilter();
         auto args = comand_line::ParseCommandLine(argc, argv);
         if (!args) {
             return EXIT_SUCCESS;
         }
-
-        // std::string config_file(argv[1]);
-        // std::string static_content_path(argv[2]);
-
-        // std::string config_file("../../data/config.json");
-        // std::string static_content_path("../../static");
-
         std::string config_file(args->config_file);
         std::string static_content_path(args->www_root);
+
+        // для запуска без параметров из VSCode
+        // std::string config_file("../../data/config.json"); 
+        // std::string static_content_path("../../static");
+        // struct Args {
+        //     bool randomize_spawn_points = false;
+        //     int tick_period = 100;
+        // };
+        // auto args = std::make_shared<Args>();
 
         // 1. Загружаем карту из файла и строим модель игры
         model::Game game(args->randomize_spawn_points);
@@ -102,20 +88,17 @@ int main(int argc, const char* argv[]) {
             ticker->Start();
         }
 
-
         // Эта надпись сообщает тестам о том, что сервер запущен и готов обрабатывать запросы
-        // std::cout << "Server has started..."sv << std::endl;
-        boost_log::LogServerStarted(port, address.to_string());
+        logger::LogServerStarted(port, address.to_string());
 
         // 6. Запускаем обработку асинхронных операций
         RunWorkers(std::max(1u, num_threads), [&ioc] {
             ioc.run();
         });
     } catch (const std::exception& ex) {
-        // std::cerr << ex.what() << std::endl;
-        boost_log::LogExitFailure(ex); 
+        logger::LogExitFailure(ex); 
         return EXIT_FAILURE;
     }
-    boost_log::LogServerExited();
+    logger::LogServerExited();
 
 }

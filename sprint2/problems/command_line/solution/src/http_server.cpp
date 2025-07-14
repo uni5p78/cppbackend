@@ -83,8 +83,4 @@ void SessionBase::Close() {
     }
 }
 
-
-
-
-
 }  // namespace http_server

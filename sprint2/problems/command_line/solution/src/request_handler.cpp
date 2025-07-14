@@ -50,21 +50,15 @@ StringResponse MakeStringResponse(http::status status, std::string_view body, un
                                 std::string_view allow) { 
     StringResponse response(status, http_version);
     response.set(http::field::content_type, content_type);
-    // auto test_base = response.base().empty();
-    // auto test_content_type = response.base().at(http::field::content_type);
     if (method != http::verb::head) {
         response.body() = body;
     }
     if (!allow.empty()) {
         response.set(http::field::allow, allow);
     }
-    // if (method != http::verb::get && method != http::verb::head) {
-    //     response.set(http::field::allow, "GET, HEAD");
-    // }
     response.set(http::field::cache_control, "no-cache"s);
     response.content_length(body.size());
     response.keep_alive(keep_alive);
-    // std::string(response.base().at(http::field::content_type));
     return response;
 }
 
