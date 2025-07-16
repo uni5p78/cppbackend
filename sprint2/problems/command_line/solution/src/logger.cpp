@@ -65,4 +65,13 @@ void LogServerExited(){
                             << "server exited"sv;
 }
 
+void LogException(const std::exception& ex, std::string_view where) {
+    json::value custom_data{
+          {"exception"s, ex.what()}
+        , {"where"s, where}
+    };
+    BOOST_LOG_TRIVIAL(info) << logging::add_value(additional_data, custom_data)
+                            << "error"sv;
+}
+
 } // namespace logger

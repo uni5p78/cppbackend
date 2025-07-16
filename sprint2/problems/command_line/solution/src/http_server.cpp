@@ -3,7 +3,7 @@
 #include <boost/asio/dispatch.hpp>
 #include <iostream>
 
-#include <boost/log/trivial.hpp>     // для BOOST_LOG_TRIVIAL
+#include <boost/log/trivial.hpp>    
 #include <boost/log/utility/setup/console.hpp>
 #include <boost/log/utility/manipulators/add_value.hpp>
 #include <boost/json.hpp>
@@ -14,8 +14,7 @@ BOOST_LOG_ATTRIBUTE_KEYWORD(additional_data, "AdditionalData", json::value)
 
 namespace http_server {
 
-void ReportError(beast::error_code ec, std::string_view what) {
-    // std::cerr << what << ": "sv << ec.message() << std::endl;
+void ReportErrorLog(beast::error_code ec, std::string_view what) {
     json::value custom_data{
           {"code"s, ec.value()}
         , {"text"s, ec.message()}
@@ -55,14 +54,14 @@ void SessionBase::OnRead(beast::error_code ec, [[maybe_unused]] std::size_t byte
         return Close();
     }
     if (ec) {
-        return ReportError(ec, "read"sv);
+        return ReportErrorLog(ec, "read"sv);
     }
     HandleRequest(std::move(request_));
 }
 
 void SessionBase::OnWrite(bool close, beast::error_code ec, [[maybe_unused]] std::size_t bytes_written) {
     if (ec) {
-        return ReportError(ec, "write"sv);
+        return ReportErrorLog(ec, "write"sv);
     }
 
     if (close) {
@@ -79,7 +78,7 @@ void SessionBase::Close() {
     beast::error_code ec;
     stream_.socket().shutdown(tcp::socket::shutdown_send, ec);
     if (ec) {
-        return ReportError(ec, "Close"sv);
+        return ReportErrorLog(ec, "Close"sv);
     }
 }
 

@@ -14,4 +14,6 @@ namespace logger
     void LogServerStarted(int port, std::string address);
     void LogExitFailure(const std::exception& ex);
     void LogServerExited();
+    void LogException(const std::exception& ex, std::string_view where);
+
 } // namespace logger

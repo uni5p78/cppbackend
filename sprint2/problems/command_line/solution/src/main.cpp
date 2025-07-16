@@ -41,15 +41,6 @@ int main(int argc, const char* argv[]) {
         std::string config_file(args->config_file);
         std::string static_content_path(args->www_root);
 
-        // для запуска без параметров из VSCode
-        // std::string config_file("../../data/config.json"); 
-        // std::string static_content_path("../../static");
-        // struct Args {
-        //     bool randomize_spawn_points = false;
-        //     int tick_period = 100;
-        // };
-        // auto args = std::make_shared<Args>();
-
         // 1. Загружаем карту из файла и строим модель игры
         model::Game game(args->randomize_spawn_points);
         json_loader::LoadGame(game, config_file);
@@ -69,7 +60,6 @@ int main(int argc, const char* argv[]) {
         auto api_strand = net::make_strand(ioc);
         const bool is_test_tick_mode = args->tick_period == 0; 
         auto handler = std::make_shared<http_handler::RequestHandler>(application, static_content_path, api_strand, is_test_tick_mode);
-        // http_handler::RequestHandler handler{game, static_content_path, api_strand};
         log_handler::LoggingRequestHandler logging_handler{*handler};
 
         // 5. Запустить обработчик HTTP-запросов, делегируя их обработчику запросов

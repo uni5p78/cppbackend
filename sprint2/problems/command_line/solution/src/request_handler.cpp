@@ -71,9 +71,8 @@ StringResponse ErrorResponseJson(http::status status, std::string_view code, std
 StringResponse ErrorResponseJson(http::status status, const StringRequest& req){
     if(status == http::status::bad_request){
         return ErrorResponseJson(status, "badRequest", "Bad request", req);
-    } else {
-        throw;
-    }
+    } 
+    throw;
 }
 
 std::vector<std::string_view> SplitQueryLine(std::string_view sv, char ch){
@@ -264,7 +263,8 @@ StringResponse ApiHandler::RequestAddPlayer(const StringRequest& req) {
     boost_json::JoinRequest req_param;
     try{
         req_param = boost_json::ParseJoinRequest(req.body());
-    } catch (...) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+    } catch (const std::exception& ex) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+        logger::LogException(ex, "Join game request parse error"sv);
         return ErrorResponseJson(http::status::bad_request, "invalidArgument","Join game request parse error", req);
     }
     std::string body;
@@ -305,13 +305,15 @@ StringResponse ApiHandler::RequestMovePlayers(const StringRequest& req){
         auto json_obj = boost_json::ParseStr(req.body());
         std::string direct = json_obj.GetParamAsString("move"s);
         dir_symbol = app_.ConvertDogDirect(direct);
-    } catch (...) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+    } catch (const std::exception& ex) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+        logger::LogException(ex, "Failed to parse action"sv);
         return ErrorResponseJson(http::status::bad_request, "invalidArgument","Failed to parse action", req);
     }
     std::string token = std::string(req.at(http::field::authorization).substr(7));
     try{
         app_.SetDogDirect(token, dir_symbol);
-    } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
+    } catch (const std::exception& ex) {  //Если при изменении направления движения собаки произошла ошибка:
+        logger::LogException(ex, "SetDogDirect"sv);
         return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
     }
     return MakeStringResponse(http::status::ok, boost_json::SerializeEmptyJsonObject()
@@ -324,13 +326,15 @@ StringResponse ApiHandler::RequestGameTick(const StringRequest& req){
         auto json_obj = boost_json::ParseStr(req.body());
         time_delta = json_obj.GetParamAsInt("timeDelta"s);
         // ch_dir = app_.ConvertDogDirect(direct);
-    } catch (...) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+    } catch (const std::exception& ex) {  //Если при парсинге JSON или получении его свойств произошла ошибка:
+        logger::LogException(ex, "Failed to parse tick request JSON"sv);
         return ErrorResponseJson(http::status::bad_request, "invalidArgument","Failed to parse tick request JSON", req);
     }
     // std::string token = std::string(req.at(http::field::authorization).substr(7));
     try{
         app_.ChangeGameSate(std::chrono::milliseconds(time_delta));
-    } catch (...) {  //Если при изменении направления движения собаки произошла ошибка:
+    } catch (const std::exception& ex) {  //Если при изменении направления движения собаки произошла ошибка:
+        logger::LogException(ex, "ChangeGameSate"sv);
         return ErrorResponseJson(http::status::service_unavailable, "error","Run time error", req);
     }
     return MakeStringResponse(http::status::ok, boost_json::SerializeEmptyJsonObject()

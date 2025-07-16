@@ -1,6 +1,7 @@
 #pragma once
 #include "http_server.h"
 #include "application.h"
+#include "logger.h"   
 #include <filesystem>
 #include <variant>
 #include <boost/asio/strand.hpp>
@@ -111,8 +112,9 @@ public:
                         // Этот assert не выстрелит, так как лямбда-функция будет выполняться внутри strand
                         assert(self->api_strand_.running_in_this_thread());
                         return send(self->HandleApiRequest(req));
-                    } catch (...) {
+                    } catch (const std::exception& ex) {
                         send(self->ReportServerError(req));
+                        logger::LogException(ex, "HandleApiRequest"sv);
                     }
                 };
                 return net::dispatch(api_strand_, handle);
@@ -124,8 +126,9 @@ public:
                     send(std::get<FileResponse>(response));
                 }
             }
-        } catch (...) {
+        } catch (const std::exception& ex) {
             send(ReportServerError(req));
+            logger::LogException(ex, "HandleRequest"sv);
         }
     }
 

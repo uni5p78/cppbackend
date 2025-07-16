@@ -1,11 +1,12 @@
 #include "tick.h"
+#include "logger.h"   
 
 namespace tick {
 
     
 namespace net = boost::asio;
 namespace sys = boost::system;
-// namespace beast = boost::beast;
+using namespace std::literals;
    
     
     
@@ -41,7 +42,8 @@ void Ticker::OnTick(sys::error_code ec) {
         last_tick_ = this_tick;
         try {
             handler_(delta);
-        } catch (...) {
+        } catch (const std::exception& ex) {
+            logger::LogException(ex, "Ticker::OnTick handler_(delta)"sv);
         }
         ScheduleTick();
     }

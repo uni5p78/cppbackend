@@ -11,26 +11,31 @@ namespace boost_json {
 
 std::string GetErrorMes(std::string_view code, std::string_view message){
     boost::json::object obj{
-          {"code", code}
-        , {"message", message}
+          {ErrorMesFields::CODE, code}
+        , {ErrorMesFields::MESSAGE, message}
     };
     return serialize(obj);   
 }
 
 JoinRequest ParseJoinRequest(const std::string& object){
-    boost::json::value j = boost::json::parse(object);
-    JoinRequest res;
-    res.user_name = j.as_object().at("userName").get_string().c_str();
-    res.map_id = j.as_object().at("mapId").get_string().c_str();
-    return res;
+    try {
+        boost::json::value json_object = boost::json::parse(object);
+        JoinRequest res;
+        res.user_name = json_object.as_object().at(JoinRequestFields::USER_NAME).get_string().c_str();
+        res.map_id = json_object.as_object().at(JoinRequestFields::MAP_ID).get_string().c_str();
+        return res;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error("ParseJoinRequest(): Error parse string in json object -> "s + ex.what());
+    }
 }    
 
 std::string GetMapsJson(const app::list_maps::Result& maps){
     boost::json::array arr;
     for(const auto&map : maps){
         boost::json::object obj;
-        obj["id"] = map.id;
-        obj["name"] = map.name;
+        obj[MapFields::ID] = map.id;
+        obj[MapFields::NAME] = map.name;
         arr.emplace_back(std::move(obj));
     }
     return serialize(arr);
@@ -40,12 +45,12 @@ boost::json::array GetRoadsArr(const app::map_info::Roads & roads){
     boost::json::array res; 
     for(const auto& road : roads){
         boost::json::object obj;
-        obj["x0"] = road.start.x;
-        obj["y0"] = road.start.y;
+        obj[RoadCoord::START_X] = road.start.x;
+        obj[RoadCoord::START_Y] = road.start.y;
         if (road.start.y == road.end.y){
-            obj["x1"] = road.end.x;
+            obj[RoadCoord::END_X] = road.end.x;
         } else {
-            obj["y1"] = road.end.y;
+            obj[RoadCoord::END_Y] = road.end.y;
         }
         res.emplace_back(std::move(obj));
     }
@@ -57,10 +62,10 @@ boost::json::array GetBuildingsArr(const app::map_info::Buildings & buildings){
     for(const auto& building : buildings){
         boost::json::object obj;
         auto bounds = building.bounds;
-        obj["x"] = bounds.position.x;
-        obj["y"] = bounds.position.y;
-        obj["w"] = bounds.size.width;
-        obj["h"] = bounds.size.height;
+        obj[BuildingFields::POSITION_X] = bounds.position.x;
+        obj[BuildingFields::POSITION_Y] = bounds.position.y;
+        obj[BuildingFields::WIDTH] = bounds.size.width;
+        obj[BuildingFields::HEIGHT] = bounds.size.height;
         res.emplace_back(std::move(obj));
     }
     return res;
@@ -72,11 +77,11 @@ boost::json::array GetOfficesArr(const app::map_info::Offices & offices){
         boost::json::object obj;
         auto position = office.position;
         auto offset = office.offset;
-        obj["id"] = office.id;
-        obj["x"] = position.x;
-        obj["y"] = position.y;
-        obj["offsetX"] = offset.dx;
-        obj["offsetY"] = offset.dy;
+        obj[OfficeFields::ID] = office.id;
+        obj[OfficeFields::POSITION_X] = position.x;
+        obj[OfficeFields::POSITION_Y] = position.y;
+        obj[OfficeFields::OFFSET_X] = offset.dx;
+        obj[OfficeFields::OFFSET_Y] = offset.dy;
         res.emplace_back(std::move(obj));
     }
     return res;
@@ -84,19 +89,19 @@ boost::json::array GetOfficesArr(const app::map_info::Offices & offices){
 
 std::string GetMapJson(const app::map_info::Result& map){
     boost::json::object obj;
-    obj["id"] = map.id_map;
-    obj["name"] = map.name_map;
-    obj["roads"] = GetRoadsArr(map.roads_);
-    obj["buildings"] = GetBuildingsArr(map.buildings_);
-    obj["offices"] = GetOfficesArr(map.offices_);
+    obj[MapFields::ID] = map.id_map;
+    obj[MapFields::NAME] = map.name_map;
+    obj[MapFields::ROADS] = GetRoadsArr(map.roads_);
+    obj[MapFields::BILDINGS] = GetBuildingsArr(map.buildings_);
+    obj[MapFields::OFFICES] = GetOfficesArr(map.offices_);
 
     return serialize(obj);
 }
 
 std::string GetPlayerJsonBody(const app::join_game::Result& player_data){
     boost::json::object obj;
-    obj["authToken"] = *player_data.token;
-    obj["playerId"] = *player_data.player_id;
+    obj[PlayerFields::TOKEN] = *player_data.token;
+    obj[PlayerFields::PAYER_ID] = *player_data.player_id;
     return serialize(obj);
 }
 
@@ -106,12 +111,12 @@ std::string GetGameSateJsonBody(const app::game_state::Result& dogs){
 
     for(const auto& dog : dogs){
         boost::json::object player;
-        player["pos"] = {dog.pos.x, dog.pos.y};
-        player["speed"] = {dog.speed.dir_x, dog.speed.dir_y};
-        player["dir"] = dog.dir ;
+        player[GameSateFields::POS] = {dog.pos.x, dog.pos.y};
+        player[GameSateFields::SPEED] = {dog.speed.dir_x, dog.speed.dir_y};
+        player[GameSateFields::DIR] = dog.dir ;
         players[dog.id] = player;
     }
-    res["players"] = players;
+    res[GameSateFields::PLAYERS] = players;
     return serialize(res);
 }
 
@@ -119,7 +124,7 @@ std::string GetPlayersJsonBody(const app::players_list::Result& dogs){
     boost::json::object obj;
     for(const auto& dog : dogs){
         boost::json::object player_obj;
-        player_obj["name"] = dog.name;
+        player_obj[DogFields::NAME] = dog.name;
         obj[dog.id] = player_obj;
     }
     return serialize(obj);
@@ -172,13 +177,18 @@ JsonValue ParseFile(const std::filesystem::path& json_path){
 }
 
 JsonValue ParseStr(const std::string& str_json){
-    //Создаем в куче дерево Json, чтобы потом не него могли ссылаться объекты JsonValue
-    auto val_shptr = std::make_shared<boost::json::value>(boost::json::parse(str_json)); 
-    JsonValue res{*val_shptr};
-    // Сохраняем shared ссылку на дерево Json в первом объекте JsonValue, чтобы продлить 
-    // срок жизни дерева до завершения обработки информации
-    res.SetParentPtr(val_shptr);
-    return res;
+    try {
+        //Создаем в куче дерево Json, чтобы потом не него могли ссылаться объекты JsonValue
+        auto val_shptr = std::make_shared<boost::json::value>(boost::json::parse(str_json)); 
+        JsonValue res{*val_shptr};
+        // Сохраняем shared ссылку на дерево Json в первом объекте JsonValue, чтобы продлить 
+        // срок жизни дерева до завершения обработки информации
+        res.SetParentPtr(val_shptr);
+        return res;
+    }
+    catch (std::exception& ex) {
+        throw std::runtime_error("ParseStr(): Error parse string in json object -> "s + ex.what());
+    }
 }
 
 

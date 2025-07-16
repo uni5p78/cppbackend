@@ -1,6 +1,5 @@
 #pragma once
 #include "sdk.h"
-// boost.beast будет использовать std::string_view вместо boost::string_view
 #define BOOST_BEAST_USE_STD_STRING_VIEW
 
 #include <boost/asio/ip/tcp.hpp>
@@ -18,7 +17,7 @@ namespace sys = boost::system;
 namespace beast = boost::beast;
 namespace http = beast::http;
 
-void ReportError(beast::error_code ec, std::string_view what);
+void ReportErrorLog(beast::error_code ec, std::string_view what);
 
 class SessionBase {
 public:
@@ -148,7 +147,7 @@ private:
         using namespace std::literals;
 
         if (ec) {
-            return ReportError(ec, "accept"sv);
+            return ReportErrorLog(ec, "accept"sv);
         }
 
         // Асинхронно обрабатываем сессию

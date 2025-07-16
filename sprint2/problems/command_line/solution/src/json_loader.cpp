@@ -13,16 +13,16 @@ namespace json_loader {
 
 void AddRoads(model::Map& map, const boost_json::ArrayJsonValue& roads){
     for(const auto& road : roads){
-        bool horizontal_road = road.ContainsParam("x1");
+        bool horizontal_road = road.ContainsParam(RoadCoord::END_X);
         if (horizontal_road){
             model::Road road_model(model::Road::HORIZONTAL
-            , {road.GetParamAsInt("x0"), road.GetParamAsInt("y0")}
-            , road.GetParamAsInt("x1"));
+            , {road.GetParamAsInt(RoadCoord::START_X), road.GetParamAsInt(RoadCoord::START_Y)}
+            , road.GetParamAsInt(RoadCoord::END_X));
             map.AddRoad(move(road_model));
         } else {
             model::Road road_model(model::Road::VERTICAL
-            , {road.GetParamAsInt("x0"), road.GetParamAsInt("y0")}
-            , road.GetParamAsInt("y1"));
+            , {road.GetParamAsInt(RoadCoord::START_X), road.GetParamAsInt(RoadCoord::START_Y)}
+            , road.GetParamAsInt(RoadCoord::END_Y));
             map.AddRoad(move(road_model));
         }
     }
@@ -32,8 +32,8 @@ void AddRoads(model::Map& map, const boost_json::ArrayJsonValue& roads){
 void AddBuildings(model::Map& map, const boost_json::ArrayJsonValue& buildings){
     for(const auto& building : buildings){
         model::Building building_model(
-            { {building.GetParamAsInt("x"), building.GetParamAsInt("y")}
-            , {building.GetParamAsInt("w"), building.GetParamAsInt("h")}}
+            { {building.GetParamAsInt(BuildingFields::POSITION_X), building.GetParamAsInt(BuildingFields::POSITION_Y)}
+            , {building.GetParamAsInt(BuildingFields::WIDTH), building.GetParamAsInt(BuildingFields::HEIGHT)}}
         );
         map.AddBuilding(move(building_model));
     }
@@ -42,10 +42,10 @@ void AddBuildings(model::Map& map, const boost_json::ArrayJsonValue& buildings){
 void AddOffices(model::Map& map, const boost_json::ArrayJsonValue& offices){
     using IdOffice = util::Tagged<std::string, model::Office>;
     for(const auto& office : offices){
-        std::string id =  office.GetParamAsString("id");
+        std::string id =  office.GetParamAsString(OfficeFields::ID);
         model::Office office_model(IdOffice(id)
-            , {office.GetParamAsInt("x"), office.GetParamAsInt("y")}
-            , {office.GetParamAsInt("offsetX"), office.GetParamAsInt("offsetY")}
+            , {office.GetParamAsInt(OfficeFields::POSITION_X), office.GetParamAsInt(OfficeFields::POSITION_Y)}
+            , {office.GetParamAsInt(OfficeFields::OFFSET_X), office.GetParamAsInt(OfficeFields::OFFSET_Y)}
         );
         map.AddOffice(move(office_model));
     }
@@ -59,25 +59,25 @@ void LoadGame(model::Game& game,const std::filesystem::path& json_path) {
 
     const auto json_obj = boost_json::ParseFile(json_path);
     // Устанавливаем скорость собак по умолчаниюю для всех карт
-    if(json_obj.ContainsParam("defaultDogSpeed"s)){ //если есть
-        game.SetDefaultDogSpeed(json_obj.GetParamAsDouble("defaultDogSpeed"s));
+    if(json_obj.ContainsParam(ConfigFields::DEFAULT_DOG_SPEED)){ //если есть
+        game.SetDefaultDogSpeed(json_obj.GetParamAsDouble(ConfigFields::DEFAULT_DOG_SPEED));
     } else { // если нет - записываем скорость по умолчанию 1.0
         game.SetDefaultDogSpeed(1.0);
     };
     
-    const auto jmaps = json_obj.GetParamAsArray("maps"s);
+    const auto jmaps = json_obj.GetParamAsArray(ConfigFields::MAPS);
     for(const auto& jmap : jmaps){
-        std::string id =  jmap.GetParamAsString("id"s);
-        std::string name =  jmap.GetParamAsString("name"s);
+        std::string id =  jmap.GetParamAsString(MapFields::ID);
+        std::string name =  jmap.GetParamAsString(MapFields::NAME);
         
         model::Map map(IdMap(id), name);
 
-        AddRoads(map, jmap.GetParamAsArray("roads"s));
-        AddBuildings(map, jmap.GetParamAsArray("buildings"s));
-        AddOffices(map, jmap.GetParamAsArray("offices"s));
+        AddRoads(map, jmap.GetParamAsArray(MapFields::ROADS));
+        AddBuildings(map, jmap.GetParamAsArray(MapFields::BILDINGS));
+        AddOffices(map, jmap.GetParamAsArray(MapFields::OFFICES));
         // Если для карты есть скорость записываем ее в модель
-        if(jmap.ContainsParam("dogSpeed"s)){
-            map.SetDogSpeed(jmap.GetParamAsDouble("dogSpeed"s));
+        if(jmap.ContainsParam(MapFields::DOG_SPEED)){
+            map.SetDogSpeed(jmap.GetParamAsDouble(MapFields::DOG_SPEED));
         } else { // если нет - записываем скорость по умолчанию для всех карт
             map.SetDogSpeed(game.GetDefaultDogSpeed());
         };
